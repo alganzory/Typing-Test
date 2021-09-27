@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { TimerComponent } from "./TimerComponent";
 import randomWords from "random-words";
+import words from "random-words";
 
 const FASTEST_WPM = 100;
 
@@ -26,6 +27,8 @@ function App() {
   const timeElapsed = useRef();
   const isExpectedSpace = useRef(false);
   const isBackSpace = useRef(false);
+  const previousSpanIndex = useRef();
+  const spanIndex = useRef(0);
   useEffect(() => {
     setWordsArray(randomWords({ exactly: FASTEST_WPM * minutes }));
     inputRef.current.focus();
@@ -34,14 +37,29 @@ function App() {
   useEffect(() => {
     if (wordsArray == null) return;
     setIncorrectLetter("");
-    console.log(wordsArray);
+    // console.log(wordsArray);
     const recentlyInputLetter = inputValue[inputValue.length - 1];
     const currentWord = wordsArray[arrayIdx.current];
-    const currentLetter = wordsArray[arrayIdx.current][wordIdx.current];
+    let prevWord = wordsArray[arrayIdx.current<=0? 0: arrayIdx.current-1]
+    let currentLetter = wordsArray[arrayIdx.current][wordIdx.current];
+    // let prevLetter = prevWord[prevWord.length-1];
+
+    //  spanIndex= 2*arrayIdx.current+wordIdx.current;
     
-    console.log("Array idx: " , arrayIdx)
+    let spanId = (isExpectedSpace.current)?  "space"+(spanIndex.current) : currentLetter+ spanIndex.current;
+    const currentCharacterSpan  = document.getElementById(spanId);
+    // console.log(currentCharacterSpan.getBoundingClientRect())
+    // currentLetter= currentLetter == null? " ": currentLetter;
+    // console.log(currentLetter)
+    // console.log(spanIndex)
+    // console.log(spanId)
+    // console.log(currentCharacterSpan)
+    // currentCharacterSpan.style.color ="red";
+    // wordIdx.current++;
+    // console.log("Array idx: " , arrayIdx)
     console.log("current word: " , currentWord)
-    console.log("current Letter: " , currentLetter)
+    // console.log("current Letter: " , currentLetter)
+
     const isValid = () => {
       // checking if the current inputted letter matches the letter in order and if the whole input
       // value matches a substring of the word
@@ -55,7 +73,8 @@ function App() {
       // console.log("inside isSpaceValid, value of recentlyInputLetter: ", recentlyInputLetter);
       // console.log("inside isSpaceValid, value of  isExpectedSpace", isExpectedSpace.current );
       // checking if the current inputted letter is space and if space is the letter expected
-      return recentlyInputLetter === " " && isExpectedSpace.current;
+      // console.log(prevWord)
+      return recentlyInputLetter === " " && isExpectedSpace.current && inputValue === (prevWord+" ");
     };
 
     // checking for a mistake first
@@ -68,11 +87,13 @@ function App() {
           ...prevScores,
           mistakes: prevScores.mistakes + 1,
         }));
-      // HANDLE REQUIRED: IF INCORRECT LETTER IS SPACE
-      if (isExpectedSpace.current) {
-        setIncorrectLetter(" ");
-      } else setIncorrectLetter(currentLetter);
-      //  console.log(incorrectLetter.current);
+
+        currentCharacterSpan.className= "letter-incorrect";
+      // if (isExpectedSpace.current) {
+      //   // setIncorrectLetter(" ");
+      // } else setIncorrectLetter(currentLetter);
+      // //  console.log(incorrectLetter.current);
+
       return;
     }
 
@@ -82,31 +103,39 @@ function App() {
         ...prevScores,
         charsCount: prevScores.charsCount + 1,
       }));
-      setCorrectStuff(
-        (prevCorrectStuff) => (prevCorrectStuff += recentlyInputLetter)
-      );
+      // setCorrectStuff(
+      //   (prevCorrectStuff) => (prevCorrectStuff += recentlyInputLetter)
+      // );
+      currentCharacterSpan.className= "letter-correct";
       isExpectedSpace.current = false;
       setInputValue("");
-
-      const typedTextHeight = document.getElementById("typed-text").getBoundingClientRect().height;
-    console.log(typedTextHeight)
+      spanIndex.current++;
+    //   const typedTextHeight = document.getElementById("typed-text").getBoundingClientRect().height;
+    // console.log(typedTextHeight)
   
-    if (typedTextHeight>=60) {
-      console.log(wordsArray);
-      setCorrectStuff("");
-      const newSlicedArray = wordsArray.slice(arrayIdx.current, wordsArray.length)
-      setWordsArray( newSlicedArray  );
+    // if (typedTextHeight>=60) {
+    //   console.log(wordsArray);
+    //   setCorrectStuff("");
+    //   const newSlicedArray = wordsArray.slice(arrayIdx.current, wordsArray.length)
+    //   setWordsArray( newSlicedArray  );
   
-      arrayIdx.current= 0;
-    }
+    //   arrayIdx.current= 0;
+    // }
+    const newSlicedArray = wordsArray.slice(arrayIdx.current, wordsArray.length)
+    console.log(newSlicedArray)
+    setWordsArray( newSlicedArray  );
+    arrayIdx.current--;
+    spanIndex.current=0;
       return;
     }
     if (isValid()) {
+       
       // if we are at the last letter of the word
       if (inputValue === wordsArray[arrayIdx.current]) {
         arrayIdx.current++; //we move on to the next word
         wordIdx.current = 0;
         isExpectedSpace.current = true;
+        // previousSpanIndex.current = spanIndex.current;
         // console.log ("at the end of the word and isExpedctedSpace: ", isExpectedSpace.current);
       } else {
         isExpectedSpace.current = false;
@@ -117,9 +146,12 @@ function App() {
         ...prevScores,
         charsCount: prevScores.charsCount + 1,
       }));
-      setCorrectStuff(
-        (prevCorrectStuff) => (prevCorrectStuff += recentlyInputLetter)
-      );
+      // setCorrectStuff(
+      //   (prevCorrectStuff) => (prevCorrectStuff += recentlyInputLetter)
+      // );
+      
+      currentCharacterSpan.className= "letter-correct";
+      spanIndex.current++;
     }
 
  
@@ -177,6 +209,23 @@ function App() {
   //   0
   // ) * 100;
 
+  function wordsArrayJSX () {
+
+    let prevFormat;
+    return(
+    wordsArray == null ? "" : wordsArray.join(" ").split("")
+          .map((character, idx)=>{ 
+          let format;
+           if ( character === " ")  
+           format = "space"+idx;
+          
+          else {
+            format = character +idx;
+          }
+          prevFormat = format;
+            
+          return <span className="letter" id={format}key={format}>{character}</span>}))
+  }
   return (
     <>
     <div className="scores" ref={scoresRef}>
@@ -195,16 +244,21 @@ function App() {
 
       <div className="paragraph-container" ref={sentenceContainer}>
         <div key={wordsArray? wordsArray[0]: 0} className="original-text">
-          {wordsArray == null ? "" : wordsArray.join(" ")}
+          {
+          
+          
+          wordsArrayJSX()
+          
+          }
 
-          <div id="typed-text" className="typed-text">
+          {/* <div id="typed-text" className="typed-text">
             <span style={{ color: "#5433ff" }}>
               {correctStuff == null ? "" : correctStuff}
             </span>
             <span style={{ color: "red", background: "rgba(255, 0,0, 0.3)" }}>
               {incorrectLetter !== " " ? incorrectLetter : "\u00A0"}
             </span>
-          </div>
+          </div> */}
         </div>
 
         <input

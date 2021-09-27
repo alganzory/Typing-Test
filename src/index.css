@@ -4,7 +4,7 @@
 }
 
 body {
-  background-color: #f3f3f3;
+  background-color: white;
   margin: 0;
   font-family: "Montserrat";
   line-height: 2.5rem;
@@ -20,7 +20,9 @@ body {
   border-radius: 0.5em;
   background-color: white;
   box-shadow: 0 0 6px 3px rgba(0, 0, 0, 0.2);
-  max-width: 80%;
+  /* max-width: 80%; */
+  width: 80%;
+  max-width: 100rem;
   
 }
 
@@ -48,7 +50,10 @@ body {
   overflow: hidden;
   animation-name: text-scroll;
   animation-duration: 200ms;
-  font-size: clamp(1.5rem, 2vw, 2.5rem);
+  font-size: 2rem;
+text-overflow: ellipsis;
+white-space: nowrap;
+width: 100% ;
 }
 
 .typed-text {
@@ -92,9 +97,22 @@ body {
 
 @keyframes text-scroll {
   from {
-    transform: translatey(60px);
+    transform: translatex(60px);
   }
   to {
-    transform: translatey(0);
+    transform: translatex(0);
   }
+}
+
+.letter {
+    color: #777;
+    background-color: white;
+}
+.letter-correct{
+    color: #5433ff;
+    background-color: white;
+}
+.letter-incorrect {
+    color: red;
+    background-color: rgba(255, 0,0, 0.3);
 }
