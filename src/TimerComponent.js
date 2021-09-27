@@ -14,8 +14,8 @@
 
         <>
 
-        <h2>Renders: {renders.current++}</h2>
-        playing : {startPlaying?"True": "False"}
+        {/* <h2>Renders: {renders.current++}</h2> */}
+        {/* playing : {startPlaying?"True": "False"} */}
     <CountdownCircleTimer
       onComplete={onTimerFinish}
       isPlaying={startPlaying}

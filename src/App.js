@@ -34,11 +34,14 @@ function App() {
   useEffect(() => {
     if (wordsArray == null) return;
     setIncorrectLetter("");
-
+    console.log(wordsArray);
     const recentlyInputLetter = inputValue[inputValue.length - 1];
     const currentWord = wordsArray[arrayIdx.current];
     const currentLetter = wordsArray[arrayIdx.current][wordIdx.current];
-
+    
+    console.log("Array idx: " , arrayIdx)
+    console.log("current word: " , currentWord)
+    console.log("current Letter: " , currentLetter)
     const isValid = () => {
       // checking if the current inputted letter matches the letter in order and if the whole input
       // value matches a substring of the word
@@ -73,6 +76,7 @@ function App() {
       return;
     }
 
+
     if (isSpaceValid()) {
       setScores((prevScores) => ({
         ...prevScores,
@@ -83,6 +87,18 @@ function App() {
       );
       isExpectedSpace.current = false;
       setInputValue("");
+
+      const typedTextHeight = document.getElementById("typed-text").getBoundingClientRect().height;
+    console.log(typedTextHeight)
+  
+    if (typedTextHeight>=60) {
+      console.log(wordsArray);
+      setCorrectStuff("");
+      const newSlicedArray = wordsArray.slice(arrayIdx.current, wordsArray.length)
+      setWordsArray( newSlicedArray  );
+  
+      arrayIdx.current= 0;
+    }
       return;
     }
     if (isValid()) {
@@ -105,6 +121,9 @@ function App() {
         (prevCorrectStuff) => (prevCorrectStuff += recentlyInputLetter)
       );
     }
+
+ 
+
   }, [inputValue, wordsArray]);
 
   useEffect(() => {
@@ -160,11 +179,25 @@ function App() {
 
   return (
     <>
+    <div className="scores" ref={scoresRef}>
+          <div style={{ color: "red" }}> Mistakes: {scores.mistakes} </div>
+          <div style={{ color: "green" }}> CPM: {scores.charsCount} </div>
+          <div style={{ color: "green" }}> WPM: {WPM.toFixed()} </div>
+          <div style={{ color: "green" }}> Accuracy: {accuracy.toFixed()}%</div>
+
+          <TimerComponent
+            onTimerFinish={onTimerFinish}
+            timerComponent={timerComponent}
+            startPlaying={started}
+            duration={60}
+          />
+        </div>
+
       <div className="paragraph-container" ref={sentenceContainer}>
-        <div className="original-text">
+        <div key={wordsArray? wordsArray[0]: 0} className="original-text">
           {wordsArray == null ? "" : wordsArray.join(" ")}
 
-          <div className="typed-text">
+          <div id="typed-text" className="typed-text">
             <span style={{ color: "#5433ff" }}>
               {correctStuff == null ? "" : correctStuff}
             </span>
@@ -181,26 +214,6 @@ function App() {
           ref={inputRef}
           onChange={handleChange}
         ></input>
-      </div>
-
-      <div>
-        <hr></hr>
-        
-        <hr></hr>
-
-        <div className="scores" ref={scoresRef}>
-          <div style={{ color: "red" }}> Mistakes: {scores.mistakes} </div>
-          <div style={{ color: "green" }}> CPM: {scores.charsCount} </div>
-          <div style={{ color: "green" }}> WPM: {WPM.toFixed()} </div>
-          <div style={{ color: "green" }}> Accuracy: {accuracy.toFixed()}%</div>
-
-          <TimerComponent
-            onTimerFinish={onTimerFinish}
-            timerComponent={timerComponent}
-            startPlaying={started}
-            duration={60}
-          />
-        </div>
       </div>
     </>
   );
