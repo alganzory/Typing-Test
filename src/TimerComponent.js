@@ -30,8 +30,8 @@
       ]}
       children = {timerComponent
       }
-      size={160}
-      strokeWidth={10}
+      size={130}
+      strokeWidth={6}
       strokeLinecap={"square"}
       isLinearGradient= {true}
 
