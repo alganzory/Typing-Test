@@ -10,151 +10,210 @@ body {
   line-height: 2.5rem;
 }
 
-.container{ 
-    display: flex;
-    margin: auto;
-    flex-direction: column;
-    width: 90vw;
+.container {
+  display: flex;
+  flex-direction: column;
+  margin: 3rem auto;
+  align-items: flex-start;
+    width: 60%;
+  max-width: 800rem;
+  gap: 2rem;
 }
-.wave {
-   position: sticky;
-   top: 0;
-}
+
 .header {
-    display: flex;
-justify-content: space-around;
-align-items: center;
+  display: flex;
+justify-content: space-between;
+  align-items: center;
+  /* text-align: center; */
+  flex-wrap: wrap-reverse;
 width: 100%;
-
-margin: 1rem auto;
+gap: 2rem;
 }
-
 
 .scores {
-    display: flex;
+  display: flex;
+  border-radius: 1rem;
+  background-color: white;
+
+  color: #5433ff;
+  border-radius: 1rem;
+  background-color: white;
+  box-shadow: 0 0 6px 3px rgba(0, 0, 0, 0.2);
+  min-height: 9rem;
+  padding: 1rem 2rem;
+  align-items: center;
+  justify-content: space-around;
+  flex-grow: 1;
+}
+
+.score {
+  color: #5433ff;
+  font-size: 1.175rem;
+}
+
+.score-input {
+  width: 3rem;
+  height: 3rem;
+  text-align: center;
+  background: rgb(84, 51, 255);
+  background: linear-gradient(
+    316deg,
+    rgba(84, 51, 255, 1) 18%,
+    rgba(32, 189, 255, 1) 81%,
+    rgba(165, 254, 203, 1) 100%
+  );
+  border: none;
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: white;
+  /* box-shadow: -1px 2px 21px 0px rgba(84,51,255,1); */
+  padding: 0.5rem;
+  border-radius: 50%;
+  margin: 1rem;
+  animation: text-scroll 200ms ease-in-out forwards;
+}
+
+.timer-container {
     border-radius: 1rem;
-    background-color: white;
-    box-shadow: 0 0 6px 3px rgba(0, 0, 0, 0.2);
-    padding: 1rem 3rem;
-    gap: 1em;
-    font-size: 1.5rem;
-  }
-  
-  .score::after{
-    position: absolute;
-    content: '';
-    left: calc(100% + 9px) ;
-    color:red;
-    width: 2px;
-    height: 80%;
-    top: 10%;
-    background-color: black;
-  } 
-  .timer-container {
-    border-radius: 50%;
-    background-color: white;
-    box-shadow: 0 0 6px 3px rgba(0, 0, 0, 0.2);
-    padding: .7rem;
-
-    
-  }
-
-  .timer {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .text {
-    color: #aaa;
-  }
-  
-  .value {
-    font-size: 40px;
-  }
-  
-  .info {
-    max-width: 360px;
-    margin: 40px auto 0;
-    text-align: center;
-    font-size: 16px;
-  }
-.paragraph-container {
 
+    align-items: center;
+    background-color: white;
+    box-shadow: 0 0 6px 3px rgba(0, 0, 0, 0.2);
+    min-height: 9rem;
+    padding: 1rem 2rem;
+   
+    flex-grow: 0;
+
+}
+
+.timer-component {
+      animation: text-scroll 200ms ease-in-out forwards;
+}
+.timer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+
+}
+
+.text {
+  color: #aaa;
+  font-size: 0.75rem;
+}
+
+.value {
+  font-size: 2rem;
+}
+
+.restart {
+  font-size: 1rem;
+  cursor: pointer;
+  color: #5433ff;
+  margin: 0px;
+}
+.info {
+  max-width: 360px;
+  margin: 40px auto 0;
+  text-align: center;
+  font-size: 0.75rem;
+}
+.paragraph-container {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  margin: 1rem auto;
+  /* margin: 2rem auto; */
   padding: 3rem;
   border-radius: 1rem;
   background-color: white;
   box-shadow: 0 0 6px 3px rgba(0, 0, 0, 0.2);
   /* max-width: 80%; */
-  width: 70%;
-  max-width: 100rem;
-  
+  /* width: 60%;
+  max-width: 800rem; */
+  text-align: center;
+  overflow: hidden;
 }
-
 
 .typing-input {
   color: #777;
-  font-size: 2rem;
-  width: 97%;
+  font-size: 1.5rem;
+  width: 100%;
   padding: 1rem;
   border-radius: 1rem;
   border-color: #999;
   border-width: 0.1px;
   border-style: solid;
   margin-top: 1rem;
-  
+  text-align: center;
+  z-index: 0;
+  font-family: inherit;
 }
 
+.disabled {
+  color: white;
+  background: rgb(84, 51, 255);
+  background: linear-gradient(
+    316deg,
+    rgba(84, 51, 255, 1) 18%,
+    rgba(32, 189, 255, 1) 81%,
+    rgba(165, 254, 203, 1) 100%
+  );
+  border: none;
+  cursor: pointer;
+  animation: text-scroll 200ms ease-in-out forwards;
+}
 .original-text {
   position: relative;
-  top: 0px;
+  top: 0.75rem;
   color: #888;
   height: 6ch;
   overflow: hidden;
-  display: -webkit-box;
+  /* display: -webkit-box; */
   /* -webkit-line-clamp: 2;
   -webkit-box-orient: vertical; */
-  overflow: hidden;
-  animation-name: text-scroll;
-  animation-duration: 200ms;
-  font-size: 2rem;
-  word-spacing: .125em;
-/* text-align: justify;
+  animation: text-scroll 200ms ease-in-out forwards;
+  font-size: 1.75rem;
+  word-spacing: 0.125em;
+  width: 90%;
+  line-height: 2.75rem;
+  /* text-align: justify;
 word-spacing:-2px; */
 }
 
+.slide {
+  animation: text-scroll 200ms ease-out forwards;
+  /* animation-name: text-scroll;
+    animation-duration: 200ms;
+    animation-timing-function: ease-in; */
+}
 .fade {
-    position: absolute;
-    bottom: 0px;
+  position: absolute;
+  bottom: 0px;
 
-    display: block;
-  
-    width: 100%;
-    height: 50%;
-  
-    background-image: linear-gradient(to bottom, 
-        rgba(255, 255, 255, 0), 
-        rgba(255, 255, 255, 0.9)
-    100%);
+  display: block;
+
+  width: 100%;
+  height: 55%;
+
+  background-image: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0),
+    rgba(255, 255, 255, 0.9) 90%
+  );
 }
 
 .noselect {
-    -webkit-user-select: none;  /* Chrome all / Safari all */
-    -moz-user-select: none;     /* Firefox all */
-    -ms-user-select: none;      /* IE 10+ */
-    user-select: none;          /* Likely future */      
+  -webkit-user-select: none; /* Chrome all / Safari all */
+  -moz-user-select: none; /* Firefox all */
+  -ms-user-select: none; /* IE 10+ */
+  user-select: none; /* Likely future */
 }
-
-
 
 @keyframes text-scroll {
   from {
-    transform: translatey(60px);
+    transform: translatey(50px);
   }
   to {
     transform: translatey(0);
@@ -162,14 +221,14 @@ word-spacing:-2px; */
 }
 
 .letter {
-    color: #777;
-    background-color: white;
+  color: #777;
+  background-color: white;
 }
-.letter-correct{
-    color: #5433ff;
-    background-color: white;
+.letter-correct {
+  color: #5433ff;
+  background-color: white;
 }
 .letter-incorrect {
-    color: red;
-    background-color: rgba(255, 0,0, 0.3);
+  color: red;
+  background-color: rgba(255, 0, 0, 0.3);
 }
