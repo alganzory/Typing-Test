@@ -8,8 +8,8 @@ export const TimerComponent = React.memo(
 
     return (
       <>
-        {/* <h2>Renders: {renders.current++}</h2> */}
-        {/* playing : {startPlaying?"True": "False"} */}
+        {/* <h2>Renders: {renders.current++}</h2>  */}
+
         <CountdownCircleTimer
   
           onComplete={onTimerFinish}
