@@ -22,20 +22,22 @@ const REFS_INITIAL = {
   prevChar: null,
   extraWrong: { id: null, count: 0 },
   spans: [],
+  wpm: 0,
+  cpm: 0,
+  accuracy: 0
 };
 function App() {
   const [{ minutes, inputValue, started }, setState] = useState({
     ...INITIAL_STATE,
   });
   const [wordsArray, setWordsArray] = useState(null);
-
   // const [minutes, setMinutes] = useState(1);
   // const [inputValue, setInputValue] = useState("");
   const arrayIdx = useRef(0);
   const wordIdx = useRef(0);
   const progressIdx = useRef(0);
 
-  const [incorrectLetters, setIncorrectLetters] = useState(new Map());
+  // const [incorrectLetters, setIncorrectLetters] = useState(new Map());
   const [restart, setRestart] = useState(0);
   const sentenceContainer = useRef();
   const inputRef = useRef();
@@ -52,6 +54,8 @@ function App() {
 
   const wordsStats = useRef({ correct: 0, incorrect: 0 });
   const charStats = useRef({ correct: 0, incorrect: 0 });
+  
+
   const resetRefs = () => {
     // Object.keys(REFS_INITIAL).forEach ((key, index) => {
     //   console.log([{]);
@@ -68,6 +72,7 @@ function App() {
     prevChar.current = REFS_INITIAL.prevChar;
     extraWrong.current = REFS_INITIAL.extraWrong;
     spans.current = REFS_INITIAL.spans;
+
   };
   useEffect(() => {
     setWordsArray(() => {
@@ -76,13 +81,15 @@ function App() {
     inputRef.current.focus();
   }, [minutes, restart]);
 
+  
+  
+
   useEffect(() => {
     console.log("started useEffect ");
     if (wordsArray == null) return;
     console.log("phew, wordsArray is not null");
     if (started == null) return;
     console.log("phew, started is not null");
-
     // we handle if the input changes because of a backspace, i.e: something deleted
     if (isBackSpace.current) {
       //resetting the flag
@@ -134,7 +141,7 @@ function App() {
 
         let deletedSpan = spans.current.pop();
         if (spanIndex.current > 1) {
-          let lastSpan = spans.current[spans.current.length - 1];
+          // let lastSpan = spans.current[spans.current.length - 1];
           shiftCaret(
             deletedSpan.offsetLeft,
             deletedSpan.offsetTop
@@ -175,12 +182,6 @@ function App() {
     let currentCharacterSpan = document.getElementById(spanId);
     // if the selected character span does not exist for whatever reason, exit early
     if (currentCharacterSpan == null) {
-      console.error(
-        "No current span",
-        currentCharacterSpan,
-        spanIndex.current,
-        spanId
-      );
       return;
     }
 
@@ -314,17 +315,17 @@ function App() {
       currentCharacterSpan.classList.add("incorrect");
 
       // add it to incorrect letters
-      setIncorrectLetters((prevIncorrectLetters) => {
-        let newIncorrectLetters = prevIncorrectLetters;
-        if (isExpectedSpace.current) currentLetter = "space";
-        if (newIncorrectLetters.has(currentLetter)) {
-          let oldValue = newIncorrectLetters.get(currentLetter);
-          newIncorrectLetters.set(currentLetter, (oldValue += 1));
-          return newIncorrectLetters;
-        }
-        newIncorrectLetters.set(currentLetter, 1);
-        return newIncorrectLetters;
-      });
+      // setIncorrectLetters((prevIncorrectLetters) => {
+      //   let newIncorrectLetters = prevIncorrectLetters;
+      //   if (isExpectedSpace.current) currentLetter = "space";
+      //   if (newIncorrectLetters.has(currentLetter)) {
+      //     let oldValue = newIncorrectLetters.get(currentLetter);
+      //     newIncorrectLetters.set(currentLetter, (oldValue += 1));
+      //     return newIncorrectLetters;
+      //   }
+      //   newIncorrectLetters.set(currentLetter, 1);
+      //   return newIncorrectLetters;
+      // });
     }
 
     // letter is correct
@@ -420,6 +421,7 @@ function App() {
   const timerComponent = useCallback(
     function ({ remainingTime, elapsedTime }) {
       timeElapsed.current = elapsedTime;
+
       return started !== false ? (
         <div className="timer">
           <div className="value">{remainingTime}</div>
@@ -478,8 +480,11 @@ function App() {
     // alert(left)
     caret.current.style.left = left;
     caret.current.style.top = top;
-    console.error (caret.current.offsetWidth);
   }
+
+
+  // const renders = useRef(0);
+
   const WPM =
     timeElapsed.current === 0
       ? 0
@@ -490,7 +495,7 @@ function App() {
       ? 0
       : charStats.current.correct / (timeElapsed.current / 60.0);
 
-  const accuracy =
+  const accuracyP =
     spanIndex.current === 0
       ? 0
       : Math.max(charStats.current.correct / spans.current.length, 0) * 100;
@@ -523,7 +528,8 @@ function App() {
   return (
     <div className="container">
       <div className="header">
-        {started === false ? (
+        {/* <h2>Renders: {renders.current++}</h2>  */}
+        {started !== "ae" ? (
           <div className="scores" ref={scoresRef}>
             {/* <div className="score" >
             {" "}
@@ -553,14 +559,14 @@ function App() {
                 disabled
                 id="accuracy"
                 className="score-input"
-                value={accuracy.toFixed() + "%"}
+                value={accuracyP.toFixed()+ "%"}
               ></input>
             </div>
           </div>
+          
         ) : (
           ""
         )}
-
         <div
           className="timer-container"
           style={
@@ -577,7 +583,7 @@ function App() {
               onTimerFinish={onTimerFinish}
               timerComponent={timerComponent}
               startPlaying={started}
-              duration={10}
+              duration={60}
             />
           </div>
         </div>
