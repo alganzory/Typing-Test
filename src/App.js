@@ -24,7 +24,7 @@ const REFS_INITIAL = {
   spans: [],
   wpm: 0,
   cpm: 0,
-  accuracy: 0
+  accuracy: 0,
 };
 function App() {
   const [{ minutes, inputValue, started }, setState] = useState({
@@ -39,7 +39,7 @@ function App() {
 
   // const [incorrectLetters, setIncorrectLetters] = useState(new Map());
   const [restart, setRestart] = useState(0);
-  const sentenceContainer = useRef();
+  const paragraphRef = useRef();
   const inputRef = useRef();
   const scoresRef = useRef();
   const timeElapsed = useRef();
@@ -54,7 +54,6 @@ function App() {
 
   const wordsStats = useRef({ correct: 0, incorrect: 0 });
   const charStats = useRef({ correct: 0, incorrect: 0 });
-  
 
   const resetRefs = () => {
     // Object.keys(REFS_INITIAL).forEach ((key, index) => {
@@ -72,7 +71,6 @@ function App() {
     prevChar.current = REFS_INITIAL.prevChar;
     extraWrong.current = REFS_INITIAL.extraWrong;
     spans.current = REFS_INITIAL.spans;
-
   };
   useEffect(() => {
     setWordsArray(() => {
@@ -81,15 +79,61 @@ function App() {
     inputRef.current.focus();
   }, [minutes, restart]);
 
-  
-  
+  const onTimerFinish = useCallback(() => {
+    setState((prevState) => ({ ...prevState, started: false }));
 
-  useEffect(() => {
-    console.log("started useEffect ");
+    inputRef.current.blur();
+    console.log(spans.current);
+    return [true, 0];
+  }, []);
+
+  const handleRestart = useCallback(() => {
+    resetRefs();
+    setState({ ...INITIAL_STATE });
+    setRestart((prevRestart) => (prevRestart += 1));
+  }, []);
+
+  const timerComponent = useCallback(
+    function ({ remainingTime, elapsedTime }) {
+      timeElapsed.current = elapsedTime;
+
+      return started !== false ? (
+        <div className="timer">
+          <div className="value">{remainingTime}</div>
+          <div className="text">seconds</div>
+        </div>
+      ) : (
+        <div className="timer">
+          <div style={{ fontSize: ".75rem", color: "#777" }}>
+            {remainingTime} seconds
+          </div>
+          <div onClick={handleRestart} className="restart">
+            restart
+          </div>
+        </div>
+      );
+    },
+    [started, handleRestart]
+  );
+
+  function handleChange({ target }) {
+    let localStarted = null;
+    console.log("handleChange");
+    if (target.value.length === 1 && target.value === " ") return;
+    if (!started) {
+      startGame();
+      localStarted = true;
+    }
+    if (started) {
+      localStarted = true;
+    }
+    setState((prevState) => ({ ...prevState, inputValue: target.value }));
+
     if (wordsArray == null) return;
     console.log("phew, wordsArray is not null");
-    if (started == null) return;
+    if (localStarted == null) return;
     console.log("phew, started is not null");
+
     // we handle if the input changes because of a backspace, i.e: something deleted
     if (isBackSpace.current) {
       //resetting the flag
@@ -142,10 +186,7 @@ function App() {
         let deletedSpan = spans.current.pop();
         if (spanIndex.current > 1) {
           // let lastSpan = spans.current[spans.current.length - 1];
-          shiftCaret(
-            deletedSpan.offsetLeft,
-            deletedSpan.offsetTop
-          );
+          shiftCaret(deletedSpan.offsetLeft, deletedSpan.offsetTop);
         } else {
           shiftCaret(deletedSpan.offsetLeft, deletedSpan.offsetTop);
         }
@@ -157,7 +198,7 @@ function App() {
           );
           let tempSpan = spans.current.pop();
           tempSpan.className = "letter";
-          shiftCaret( tempSpan.offsetLeft, tempSpan.offsetTop )
+          shiftCaret(tempSpan.offsetLeft, tempSpan.offsetTop);
         }
       }
 
@@ -170,10 +211,10 @@ function App() {
     }
 
     console.log("So we are not deleting... now to business");
-    if (!inputValue.length) return;
+    if (!target.value.length) return;
     console.log("phew, input value length is not zero");
 
-    const recentlyInputLetter = inputValue[inputValue.length - 1];
+    const recentlyInputLetter = target.value[target.value.length - 1];
     const currentWord = wordsArray[arrayIdx.current];
     let currentLetter = wordsArray[arrayIdx.current][wordIdx.current];
     let spanId = isExpectedSpace.current
@@ -190,24 +231,32 @@ function App() {
     if (prevChar.current != null) {
       prevChar.current.classList.remove("active");
     }
-
+    const currentBoundingRect = currentCharacterSpan.getBoundingClientRect();
+    const currentHeight = currentBoundingRect.y;
     // And then push it to the array of spans that have been activated
     if (currentCharacterSpan !== spans.current[spans.current.length - 1]) {
       spans.current.push(currentCharacterSpan);
-    
-    }  let lastSpan = spans.current[spans.current.length - 1];
-      
-     shiftCaret(
-        lastSpan.offsetLeft + lastSpan.offsetWidth,
-        lastSpan.offsetTop
-      );
+    }
+    let lastSpan = spans.current[spans.current.length - 1];
+
+    if (lastSpan.offsetWidth === 0 && lastSpan.id.includes ("space") ){
+      let nextLetter = wordsArray[arrayIdx.current+1][0];
+      let nextSpanId = nextLetter +( spanIndex.current+1);
+      let nextSpan = document.getElementById(nextSpanId);
+      if (nextSpan) 
+      shiftCaret (nextSpan.offsetLeft, nextSpan.offsetTop )
+    }
+    else {
+      shiftCaret(lastSpan.offsetLeft + lastSpan.offsetWidth, lastSpan.offsetTop);
+    }
+    // let left = lastSpan.offsetLeft + lastSpan.getBoundingClientRect;
+    // console.error (left)
+
+    // console.error(originalText.offsetWidth)
+
 
     // slide into line-----------------------
-    const currentBoundingRect = currentCharacterSpan.getBoundingClientRect();
-    const currentHeight = currentBoundingRect.y;
 
-    // document.getElementById("caret").style.top= currentBoundingRect.top+"px"
-    //-----------------------------------------
 
     const isCorrect = () => {
       // checking if the current inputted letter matches the letter in order and if the whole input
@@ -215,12 +264,8 @@ function App() {
       return recentlyInputLetter === currentLetter;
     };
 
-    //---------------------------------------------
-
     // Now we check if what we inputted was a space
     if (recentlyInputLetter === " ") {
-    
-
       // if space is expected, meaning it's the correct thing
       if (isExpectedSpace.current) {
         // toggle the flag back off
@@ -229,18 +274,14 @@ function App() {
         currentCharacterSpan.classList.add("correct");
         currentCharacterSpan.classList.remove("incorrect");
         // Increase correct words
-        if (inputValue === currentWord+" ") {
+        if (target.value === currentWord + " ") {
           wordsStats.current.correct++;
           charStats.current.correct += currentWord.length + 1;
 
-
-
           // if (containerComponent.lastChild)
-            // containerComponent.removeChild(containerComponent.lastChild);
-        
+          // containerComponent.removeChild(containerComponent.lastChild);
         } else {
           wordsStats.current.incorrect++;
-  
         }
       }
 
@@ -261,9 +302,21 @@ function App() {
           spanId = currentLetter + spanIndex.current;
           currentCharacterSpan = document.getElementById(spanId);
         } while (!spanId.includes("space"));
+
+
+        // to handle shifting the caret to the new line if the rest of the word is wrong
+        if (currentCharacterSpan.offsetWidth === 0 ){
+          let nextLetter = wordsArray[arrayIdx.current+1][0];
+          let nextSpanId = nextLetter +( spanIndex.current+1);
+          let nextSpan = document.getElementById(nextSpanId);
+          if (nextSpan) 
+          shiftCaret (nextSpan.offsetLeft, nextSpan.offsetTop )
+        } else 
         shiftCaret(
           currentCharacterSpan.offsetLeft + currentCharacterSpan.offsetWidth
         );
+
+        
       }
 
       // move to the next word in the array
@@ -288,8 +341,6 @@ function App() {
       return;
     }
 
-    // CHECK FOR MISTAKE
-
     // letter not correct
     if (!isCorrect()) {
       // if the user made a mistake by adding letters to the end of the word instead of a backspace
@@ -300,7 +351,10 @@ function App() {
         wrongChar.className = "letter incorrect";
         prevChar.current.appendChild(wrongChar);
         let lastChild = prevChar.current.lastChild;
-        shiftCaret(lastChild.offsetLeft + lastChild.offsetWidth, lastChild.offsetTop);
+        shiftCaret(
+          lastChild.offsetLeft + lastChild.offsetWidth,
+          lastChild.offsetTop
+        );
         if (extraWrong.current.id !== prevChar.current.id) {
           extraWrong.current.id = prevChar.current.id;
           extraWrong.current.count = 1;
@@ -313,19 +367,6 @@ function App() {
       // make it red
       currentCharacterSpan.classList.remove("correct");
       currentCharacterSpan.classList.add("incorrect");
-
-      // add it to incorrect letters
-      // setIncorrectLetters((prevIncorrectLetters) => {
-      //   let newIncorrectLetters = prevIncorrectLetters;
-      //   if (isExpectedSpace.current) currentLetter = "space";
-      //   if (newIncorrectLetters.has(currentLetter)) {
-      //     let oldValue = newIncorrectLetters.get(currentLetter);
-      //     newIncorrectLetters.set(currentLetter, (oldValue += 1));
-      //     return newIncorrectLetters;
-      //   }
-      //   newIncorrectLetters.set(currentLetter, 1);
-      //   return newIncorrectLetters;
-      // });
     }
 
     // letter is correct
@@ -338,12 +379,11 @@ function App() {
     prevChar.current = currentCharacterSpan;
 
     // Handling when we reach the end of the word
-    if (inputValue.length === currentWord.length) {
+    if (target.value.length === currentWord.length) {
       isExpectedSpace.current = true;
     }
-
     // Handling when we add extra wrong stuff
-    else if (inputValue.length > currentWord.length) {
+    else if (target.value.length > currentWord.length) {
       let wrongChar = document.createElement("span");
       wrongChar.innerHTML = recentlyInputLetter;
       wrongChar.className = "letter incorrect";
@@ -356,7 +396,6 @@ function App() {
       } else extraWrong.current.count++;
       return;
     }
-
     // If we get to this point, it means that we got the letter
     // either right or wrong, and we are not at the end of
     // the word and we did not hit space or backspace
@@ -365,89 +404,38 @@ function App() {
     spanIndex.current += 1;
 
     if (currentHeight > prevHeight.current) {
-      shiftCaret (currentCharacterSpan.offsetLeft, currentCharacterSpan.offsetTop)
+      shiftCaret(
+        currentCharacterSpan.offsetLeft + currentBoundingRect.offsetWidth,
+        currentCharacterSpan.offsetTop
+      );
+
+      // let newArray = [...wordsArray];
+
+      // let doneWords = newArray.splice(
+      //   0,
+      //   arrayIdx.current
+      // )
+      // newArray= [ ...newArray, ...doneWords ];
+
+      // setWordsArray(newArray);
+      let offset = -currentCharacterSpan.offsetTop;
+      offset += "px";
+      paragraphRef.current.style.transform = "translateY(" + offset + ")";
+      // arrayIdx.current = 0;
+      // spanIndex.current = 0;
+      // wordIdx.current = 0;
+      // progressIdx.current = 0;
       
-      let newArray = wordsArray;
+      prevHeight.current = currentHeight;
+      //to eliminate repetition of spans
+      // spans.current.pop();
+      prevHeight.current = Infinity;
+      // handleChange({target})
 
-      let doneWords = newArray.splice(
-        0,
-        arrayIdx.current
-      )
-      newArray= [ ...newArray, ...doneWords ];
-      
-
-      setWordsArray(newArray);
-      arrayIdx.current = 0;
-      spanIndex.current = 0;
-      wordIdx.current = 0;
-      progressIdx.current = 0;
-
-      //to eliminate repetition of spans 
-      spans.current.pop();
-    } else {
+      return;
     }
     prevHeight.current = currentHeight;
-    // document.getElementById("caret").style.left = currentCharacterSpan.offsetLeft+currentCharacterSpan.offsetWidth+"px"
-    // document.getElementById("caret").style.top = currentCharacterSpan.offsetTop+"px"
-  }, [inputValue, started, wordsArray]);
-
-  // useEffect(() => {
-  //   console.log("Input value changed");
-  // }, [inputValue]);
-
-  // useEffect(() => {
-  //   console.log("started Changed");
-  // }, [started]);
-
-  // useEffect(() => {
-  //   console.log("wordsArray changed");
-  // }, [wordsArray]);
-  // functions --------------------------------------------------------------
-
-  const onTimerFinish = useCallback(() => {
-    setState((prevState) => ({ ...prevState, started: false }));
-
-    inputRef.current.blur();
-    console.log(spans.current);
-    return [true, 0];
-  }, []);
-
-  const handleRestart = useCallback(() => {
-    resetRefs();
-    setState({ ...INITIAL_STATE });
-    setRestart((prevRestart) => (prevRestart += 1));
-  }, []);
-
-  const timerComponent = useCallback(
-    function ({ remainingTime, elapsedTime }) {
-      timeElapsed.current = elapsedTime;
-
-      return started !== false ? (
-        <div className="timer">
-          <div className="value">{remainingTime}</div>
-          <div className="text">seconds</div>
-        </div>
-      ) : (
-        <div className="timer">
-          <div style={{ fontSize: ".75rem", color: "#777" }}>
-            {remainingTime} seconds
-          </div>
-          <div onClick={handleRestart} className="restart">
-            restart
-          </div>
-        </div>
-      );
-    },
-    [started, handleRestart]
-  );
-
-  function handleChange({ target }) {
-    console.log("handleChange");
-   if (target.value.length === 1 && target.value === " ") return;
-   if (!started) {
-     startGame();
-   }
-    setState((prevState) => ({ ...prevState, inputValue: target.value }));
+    // document.getElementById("caret").st
   }
 
   function handleKey(e) {
@@ -463,7 +451,6 @@ function App() {
     if (e.code === "Space") {
       return;
     }
-   
   }
 
   function startGame() {
@@ -482,8 +469,7 @@ function App() {
     caret.current.style.top = top;
   }
 
-
-  // const renders = useRef(0);
+  const renders = useRef(0);
 
   const WPM =
     timeElapsed.current === 0
@@ -514,21 +500,32 @@ function App() {
               format = character + idx;
             }
             return (
-              <span className="letter" id={format} key={format}
-           >
-                {idx===0? <span className={"caret" +( started === null? " initial": "")} id="caret" ref={caret}
-
-                > </span>: ""}
-                <span className ="character">{character}</span>
+              <span className="letter" id={format} key={format}>
+                {idx === 0 ? (
+                  <span
+                    className={"caret" + (started === null ? " initial" : "")}
+                    id="caret"
+                    ref={caret}
+                  >
+                    {" "}
+                  </span>
+                ) : (
+                  ""
+                )}
+                <span className="character">{character}</span>
               </span>
             );
           });
   }
 
+  useEffect(() => {
+    renders.current++;
+  });
+
   return (
     <div className="container">
       <div className="header">
-        {/* <h2>Renders: {renders.current++}</h2>  */}
+        <h2>Renders: {renders.current}</h2>
         {started !== "ae" ? (
           <div className="scores" ref={scoresRef}>
             {/* <div className="score" >
@@ -559,11 +556,10 @@ function App() {
                 disabled
                 id="accuracy"
                 className="score-input"
-                value={accuracyP.toFixed()+ "%"}
+                value={accuracyP.toFixed() + "%"}
               ></input>
             </div>
           </div>
-          
         ) : (
           ""
         )}
@@ -583,25 +579,22 @@ function App() {
               onTimerFinish={onTimerFinish}
               timerComponent={timerComponent}
               startPlaying={started}
-              duration={60}
+              duration={600}
             />
           </div>
         </div>
       </div>
 
       <div className="paragraph-container noselect">
-        <div key={wordsArray ? wordsArray[0] : 0} className={"original-text"}>
-        {/* <span className={"caret" +( started === null? " initial": "")} id="caret" ref={caret}
+        <div key={wordsArray ? wordsArray[0] : 0} className={"original-text"} id="original-text">
+          {/* <span className={"caret" +( started === null? " initial": "")} id="caret" ref={caret}
 
 > </span> */}
-          <div ref={sentenceContainer} >
-          
-               {wordsArrayJSX()}
-              {/* { <div className="caret" ref={caret} id="caret"></div>} */}
-               
-               </div> 
-        
-        
+          <div id="paragraph" ref={paragraphRef}>
+            {wordsArrayJSX()}
+            {/* { <div className="caret" ref={caret} id="caret"></div>} */}
+          </div>
+
           <div className="fade" id="fader"></div>
         </div>
 

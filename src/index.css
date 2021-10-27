@@ -190,6 +190,9 @@ body {
 word-spacing:-2px; */
 }
 
+#paragraph {
+  transition: 100ms ease-out;
+}
 .slide {
   animation: text-scroll 200ms ease-out forwards;
   /* animation-name: text-scroll;
