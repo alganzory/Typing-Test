@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { TimerComponent } from "./TimerComponent";
 import randomWords from "random-words";
 
-const FASTEST_WPM = 100;
+
+const FASTEST_WPM = 216; // quick google search
 const INITIAL_STATE = {
   minutes: 1,
   inputValue: "",
@@ -115,6 +116,14 @@ function App() {
     },
     [started, handleRestart]
   );
+
+  function increaseWordsArray () {
+
+    alert ("wordsArray increased")
+    setWordsArray(() => {
+      return  ([...wordsArray, ...randomWords({ exactly: (FASTEST_WPM/2) * minutes })]);
+    });
+  }
 
   function handleChange({ target }) {
     let localStarted = null;
@@ -249,15 +258,6 @@ function App() {
     else {
       shiftCaret(lastSpan.offsetLeft + lastSpan.offsetWidth, lastSpan.offsetTop);
     }
-    // let left = lastSpan.offsetLeft + lastSpan.getBoundingClientRect;
-    // console.error (left)
-
-    // console.error(originalText.offsetWidth)
-
-
-    // slide into line-----------------------
-
-
     const isCorrect = () => {
       // checking if the current inputted letter matches the letter in order and if the whole input
       // value matches a substring of the word
@@ -322,6 +322,7 @@ function App() {
       // move to the next word in the array
       arrayIdx.current++;
 
+  
       // move to the next span
       spanIndex.current++;
 
@@ -404,11 +405,14 @@ function App() {
     spanIndex.current += 1;
 
     if (currentHeight > prevHeight.current) {
+      
       shiftCaret(
         currentCharacterSpan.offsetLeft + currentBoundingRect.offsetWidth,
         currentCharacterSpan.offsetTop
       );
-
+      if (arrayIdx.current >=( 0.6 * wordsArray.length)) {
+        increaseWordsArray();
+      } 
       // let newArray = [...wordsArray];
 
       // let doneWords = newArray.splice(
@@ -432,6 +436,7 @@ function App() {
       prevHeight.current = Infinity;
       // handleChange({target})
 
+   
       return;
     }
     prevHeight.current = currentHeight;
