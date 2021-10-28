@@ -27,19 +27,21 @@ const REFS_INITIAL = {
   cpm: 0,
   accuracy: 0,
 };
+
+
 function App() {
+
+
+  
   const [{ minutes, inputValue, started }, setState] = useState({
     ...INITIAL_STATE,
   });
   const [wordsArray, setWordsArray] = useState(null);
-  // const [minutes, setMinutes] = useState(1);
-  // const [inputValue, setInputValue] = useState("");
+  const [restart, setRestart] = useState(0);
+
   const arrayIdx = useRef(0);
   const wordIdx = useRef(0);
   const progressIdx = useRef(0);
-
-  // const [incorrectLetters, setIncorrectLetters] = useState(new Map());
-  const [restart, setRestart] = useState(0);
   const paragraphRef = useRef();
   const inputRef = useRef();
   const scoresRef = useRef();
@@ -52,14 +54,10 @@ function App() {
   const prevChar = useRef();
   const extraWrong = useRef({ id: null, count: 0 });
   const spans = useRef([]);
-
   const wordsStats = useRef({ correct: 0, incorrect: 0 });
   const charStats = useRef({ correct: 0, incorrect: 0 });
 
   const resetRefs = () => {
-    // Object.keys(REFS_INITIAL).forEach ((key, index) => {
-    //   console.log([{]);
-    // })
     arrayIdx.current = REFS_INITIAL.arrayIdx;
     wordIdx.current = REFS_INITIAL.wordIdx;
     isExpectedSpace.current = REFS_INITIAL.isExpectedSpace;
@@ -73,13 +71,7 @@ function App() {
     extraWrong.current = REFS_INITIAL.extraWrong;
     spans.current = REFS_INITIAL.spans;
   };
-  useEffect(() => {
-    setWordsArray(() => {
-      return randomWords({ exactly: FASTEST_WPM * minutes });
-    });
-    inputRef.current.focus();
-  }, [minutes, restart]);
-
+  
   const onTimerFinish = useCallback(() => {
     setState((prevState) => ({ ...prevState, started: false }));
 
@@ -93,7 +85,6 @@ function App() {
     setState({ ...INITIAL_STATE });
     setRestart((prevRestart) => (prevRestart += 1));
   }, []);
-
   const timerComponent = useCallback(
     function ({ remainingTime, elapsedTime }) {
       timeElapsed.current = elapsedTime;
@@ -117,14 +108,21 @@ function App() {
     [started, handleRestart]
   );
 
-  function increaseWordsArray () {
+  
+  useEffect(() => {
+    setWordsArray(() => {
+      return randomWords({ exactly: FASTEST_WPM * minutes });
+    });
+    inputRef.current.focus();
+  }, [minutes, restart]);
 
+  const increaseWordsArray =  () => {
     alert ("wordsArray increased")
     setWordsArray(() => {
       return  ([...wordsArray, ...randomWords({ exactly: (FASTEST_WPM/2) * minutes })]);
     });
   }
-
+  
   function handleChange({ target }) {
     let localStarted = null;
     console.log("handleChange");
@@ -136,7 +134,9 @@ function App() {
     if (started) {
       localStarted = true;
     }
-    setState((prevState) => ({ ...prevState, inputValue: target.value }));
+
+    inputRef.current.value= target.value;
+
 
     if (wordsArray == null) return;
     console.log("phew, wordsArray is not null");
@@ -334,7 +334,9 @@ function App() {
       wordIdx.current = 0;
 
       // empty the input field
-      setState((prevState) => ({ ...prevState, inputValue: "" }));
+
+      inputRef.current.value = "";
+
 
       // reset the extra wrong, cause we are moving to a new word
       extraWrong.current = { id: null, count: 0 };
@@ -445,7 +447,7 @@ function App() {
 
   function handleKey(e) {
     if (e.code === "Backspace" || e.code === "Delete") {
-      if (arrayIdx.current === 0 && inputValue.length === 0) return;
+      if (arrayIdx.current === 0 && inputRef.current.value.length === 0) return; // X1 CHANGE TO INPUTVALUE
       if (spanIndex.current <= progressIdx.current) {
         return;
         // console.log (spanIndex.current, progressIdx.current)
@@ -607,7 +609,6 @@ function App() {
           style={started === false ? { display: "none" } : {}}
           className="typing-input"
           onKeyDown={handleKey}
-          value={inputValue}
           ref={inputRef}
           onChange={handleChange}
           autoCapitalize="none"
