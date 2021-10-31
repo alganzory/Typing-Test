@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { TimerComponent } from "./TimerComponent";
+import RestartButton from "./RestartButton"
 import randomWords from "random-words";
-
-
-const FASTEST_WPM = 216; // quick google search
+const FASTEST_WPM = 40; // quick google search
 const INITIAL_STATE = {
   minutes: 1,
   inputValue: "",
@@ -28,11 +27,7 @@ const REFS_INITIAL = {
   accuracy: 0,
 };
 
-
 function App() {
-
-
-  
   const [{ minutes, inputValue, started }, setState] = useState({
     ...INITIAL_STATE,
   });
@@ -71,11 +66,10 @@ function App() {
     extraWrong.current = REFS_INITIAL.extraWrong;
     spans.current = REFS_INITIAL.spans;
   };
-  
+
   const onTimerFinish = useCallback(() => {
     setState((prevState) => ({ ...prevState, started: false }));
-
-    inputRef.current.blur();
+    blurParagraph(1);
     console.log(spans.current);
     return [true, 0];
   }, []);
@@ -108,7 +102,6 @@ function App() {
     [started, handleRestart]
   );
 
-  
   useEffect(() => {
     setWordsArray(() => {
       return randomWords({ exactly: FASTEST_WPM * minutes });
@@ -116,13 +109,16 @@ function App() {
     inputRef.current.focus();
   }, [minutes, restart]);
 
-  const increaseWordsArray =  () => {
-    alert ("wordsArray increased")
+  const increaseWordsArray = () => {
+    alert("wordsArray increased");
     setWordsArray(() => {
-      return  ([...wordsArray, ...randomWords({ exactly: (FASTEST_WPM/2) * minutes })]);
+      return [
+        ...wordsArray,
+        ...randomWords({ exactly: (FASTEST_WPM / 2) * minutes }),
+      ];
     });
-  }
-  
+  };
+
   function handleChange({ target }) {
     let localStarted = null;
     console.log("handleChange");
@@ -135,8 +131,7 @@ function App() {
       localStarted = true;
     }
 
-    inputRef.current.value= target.value;
-
+    inputRef.current.value = target.value;
 
     if (wordsArray == null) return;
     console.log("phew, wordsArray is not null");
@@ -248,15 +243,16 @@ function App() {
     }
     let lastSpan = spans.current[spans.current.length - 1];
 
-    if (lastSpan.offsetWidth === 0 && lastSpan.id.includes ("space") ){
-      let nextLetter = wordsArray[arrayIdx.current+1][0];
-      let nextSpanId = nextLetter +( spanIndex.current+1);
+    if (lastSpan.offsetWidth === 0 && lastSpan.id.includes("space")) {
+      let nextLetter = wordsArray[arrayIdx.current + 1][0];
+      let nextSpanId = nextLetter + (spanIndex.current + 1);
       let nextSpan = document.getElementById(nextSpanId);
-      if (nextSpan) 
-      shiftCaret (nextSpan.offsetLeft, nextSpan.offsetTop )
-    }
-    else {
-      shiftCaret(lastSpan.offsetLeft + lastSpan.offsetWidth, lastSpan.offsetTop);
+      if (nextSpan) shiftCaret(nextSpan.offsetLeft, nextSpan.offsetTop);
+    } else {
+      shiftCaret(
+        lastSpan.offsetLeft + lastSpan.offsetWidth,
+        lastSpan.offsetTop
+      );
     }
     const isCorrect = () => {
       // checking if the current inputted letter matches the letter in order and if the whole input
@@ -303,26 +299,21 @@ function App() {
           currentCharacterSpan = document.getElementById(spanId);
         } while (!spanId.includes("space"));
 
-
         // to handle shifting the caret to the new line if the rest of the word is wrong
-        if (currentCharacterSpan.offsetWidth === 0 ){
-          let nextLetter = wordsArray[arrayIdx.current+1][0];
-          let nextSpanId = nextLetter +( spanIndex.current+1);
+        if (currentCharacterSpan.offsetWidth === 0) {
+          let nextLetter = wordsArray[arrayIdx.current + 1][0];
+          let nextSpanId = nextLetter + (spanIndex.current + 1);
           let nextSpan = document.getElementById(nextSpanId);
-          if (nextSpan) 
-          shiftCaret (nextSpan.offsetLeft, nextSpan.offsetTop )
-        } else 
-        shiftCaret(
-          currentCharacterSpan.offsetLeft + currentCharacterSpan.offsetWidth
-        );
-
-        
+          if (nextSpan) shiftCaret(nextSpan.offsetLeft, nextSpan.offsetTop);
+        } else
+          shiftCaret(
+            currentCharacterSpan.offsetLeft + currentCharacterSpan.offsetWidth
+          );
       }
 
       // move to the next word in the array
       arrayIdx.current++;
 
-  
       // move to the next span
       spanIndex.current++;
 
@@ -336,7 +327,6 @@ function App() {
       // empty the input field
 
       inputRef.current.value = "";
-
 
       // reset the extra wrong, cause we are moving to a new word
       extraWrong.current = { id: null, count: 0 };
@@ -407,38 +397,20 @@ function App() {
     spanIndex.current += 1;
 
     if (currentHeight > prevHeight.current) {
-      
       shiftCaret(
         currentCharacterSpan.offsetLeft + currentBoundingRect.offsetWidth,
         currentCharacterSpan.offsetTop
       );
-      if (arrayIdx.current >=( 0.6 * wordsArray.length)) {
+      if (arrayIdx.current >= 0.6 * wordsArray.length) {
         increaseWordsArray();
-      } 
-      // let newArray = [...wordsArray];
+      }
 
-      // let doneWords = newArray.splice(
-      //   0,
-      //   arrayIdx.current
-      // )
-      // newArray= [ ...newArray, ...doneWords ];
-
-      // setWordsArray(newArray);
       let offset = -currentCharacterSpan.offsetTop;
       offset += "px";
+      paragraphRef.current.style.top = "3.125rem";
       paragraphRef.current.style.transform = "translateY(" + offset + ")";
-      // arrayIdx.current = 0;
-      // spanIndex.current = 0;
-      // wordIdx.current = 0;
-      // progressIdx.current = 0;
-      
-      prevHeight.current = currentHeight;
-      //to eliminate repetition of spans
-      // spans.current.pop();
-      prevHeight.current = Infinity;
-      // handleChange({target})
 
-   
+      prevHeight.current = currentHeight;
       return;
     }
     prevHeight.current = currentHeight;
@@ -460,9 +432,39 @@ function App() {
     }
   }
 
+  let blurTimeout;
+
+  function handleOutOfFocus() {
+    // alert ("WTF")
+
+    blurTimeout = setTimeout(() => {
+      if (!inputRef.current) return;
+      if (document.activeElement === inputRef.current) return;
+      blurParagraph(5);
+      document.getElementById("out-focus").style.display = "block";
+    }, 1000);
+  }
+
+  function blurParagraph(blurAmount) {
+    if (blurAmount === 0) paragraphRef.current.style.filter = "none";
+    else paragraphRef.current.style.filter = `blur(${blurAmount}px)`;
+  }
+
+  function handleFocus() {
+    blurParagraph(0);
+    document.getElementById("out-focus").style.display = "none";
+  }
+
+  function handleFocusClick() {
+    clearTimeout(blurTimeout);
+    if (!inputRef.current) return;
+    inputRef.current.focus();
+  }
+
   function startGame() {
     setState({ ...INITIAL_STATE });
     setState((prevState) => ({ ...prevState, started: true }));
+    inputRef.current.focus();
     // setStarted(true);
     // setScores({ wordsCount: 0, charsCount: 0, mistakes: 0 });
     // setInputValue("");
@@ -586,44 +588,48 @@ function App() {
               onTimerFinish={onTimerFinish}
               timerComponent={timerComponent}
               startPlaying={started}
-              duration={600}
+              duration={1}
             />
           </div>
         </div>
       </div>
 
-      <div className="paragraph-container noselect">
-        <div key={wordsArray ? wordsArray[0] : 0} className={"original-text"} id="original-text">
+      <div className="paragraph-container noselect" onClick={handleFocusClick}>
+        <div id="out-focus"> click to focus</div>
+        <div
+          key={wordsArray ? wordsArray[0] : 0}
+          className={"original-text"}
+          id="original-text"
+        >
           {/* <span className={"caret" +( started === null? " initial": "")} id="caret" ref={caret}
 
 > </span> */}
+
           <div id="paragraph" ref={paragraphRef}>
             {wordsArrayJSX()}
             {/* { <div className="caret" ref={caret} id="caret"></div>} */}
           </div>
 
-          <div className="fade" id="fader"></div>
+          {/* <div className="fade" id="fader"></div> */}
         </div>
 
-        <input
-          style={started === false ? { display: "none" } : {}}
-          className="typing-input"
-          onKeyDown={handleKey}
-          ref={inputRef}
-          onChange={handleChange}
-          autoCapitalize="none"
-          autoComplete="off"
-          spellCheck="false"
-          autoCorrect="off"
-        ></input>
+        {started !== false ? (
+          <input
+            className="typing-input"
+            onKeyDown={handleKey}
+            ref={inputRef}
+            onChange={handleChange}
+            autoCapitalize="none"
+            autoComplete="off"
+            spellCheck="false"
+            autoCorrect="off"
+            onBlur={handleOutOfFocus}
+            onFocus={handleFocus}
+          ></input>
+        ) : ""}
 
-        <button
-          style={started !== false ? { display: "none" } : {}}
-          className={"typing-input disabled"}
-          onClick={handleRestart}
-        >
-          restart
-        </button>
+        <RestartButton onClick = {handleRestart} started ={started}/>
+   
       </div>
     </div>
   );

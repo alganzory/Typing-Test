@@ -105,14 +105,60 @@ body {
 
 .value {
   font-size: 2rem;
-  color: #444
+  color: #444;
 }
-
+/* 
 .restart {
   font-size: 1rem;
   cursor: pointer;
   color: #444;
   margin: 0px;
+} */
+
+#small-restart {
+  align-self: center;
+  font-size: 1rem;
+  text-align: center;
+  color: white;
+  background: linear-gradient(
+    316deg,
+    rgba(84, 51, 255, 1) 18%,
+    rgba(32, 189, 255, 1) 81%,
+    rgba(165, 254, 203, 1) 100%
+  );
+  border: none;
+  border-radius: 50%;
+  height: 4rem;
+  width: 4rem;
+  font-family: inherit;
+  z-index: 333;
+  animation-fill-mode: forwards;
+  position: absolute;
+  bottom: -5rem;
+  cursor: pointer;
+}
+
+@keyframes reset-expand {
+  0% {
+    font-size: 1rem;
+  }
+  20% {
+    border-bottom-left-radius: 20%;
+    border-bottom-right-radius: 20%;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  
+  }
+  100% {
+    bottom: 0;
+    width: 100%;
+    height: 36%;
+    border-bottom-left-radius: 1rem;
+    border-bottom-right-radius: 1rem;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    font-size: 2rem;
+  }
 }
 .info {
   max-width: 360px;
@@ -134,28 +180,44 @@ body {
   /* width: 60%;
   max-width: 800rem; */
   text-align: center;
-  overflow: hidden;
+  /* overflow: hidden; */
   animation: text-scroll 500ms ease-in-out forwards;
   width: 100%;
+  height: 12rem;
 }
 
 .typing-input {
   color: #777;
   font-size: 1.5rem;
-  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  width: 0%;
   padding: 1rem;
   /* border-radius: 1rem; */
   margin-top: 1rem;
   text-align: center;
-  z-index: 0;
+  z-index: -1;
   font-family: inherit;
   outline: none;
   border: none;
   box-shadow: 0 0 6px 3px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+  resize: none;
+  margin: 0;
+  padding: 0;
 }
 
-.disabled {
+.restart-button {
   color: white;
+  font-size: 1.5rem;
+  text-align: center;
+  width: 100%;
+  height: 36%;
+  font-family: inherit;
+  position: absolute;
+  bottom: 0;
   background: rgb(84, 51, 255);
   background: linear-gradient(
     316deg,
@@ -171,10 +233,10 @@ body {
 }
 .original-text {
   position: relative;
-  top: 0.75rem;
-  color: #888;
-  height: 7rem;
 
+  color: #888;
+  height: 70%;
+  top: 0;
   overflow: hidden;
   /* display: -webkit-box; */
   /* -webkit-line-clamp: 2;
@@ -183,15 +245,18 @@ body {
   font-size: 1.75rem;
   word-spacing: 0.125em;
   width: 85%;
-  line-height: 2.75rem;
-  margin-top: 2.5rem;
+  line-height: 3rem;
+  /* margin-top: 1rem; */
   /* vertical-align: middle; */
   /* text-align: justify;
 word-spacing:-2px; */
 }
 
 #paragraph {
-  transition: 100ms ease-out;
+  position: absolute;
+  top: 2.125rem;
+  overflow: hidden;
+  transition: all 100ms ease-out, filter 200ms ease;
 }
 .slide {
   animation: text-scroll 200ms ease-out forwards;
@@ -201,12 +266,12 @@ word-spacing:-2px; */
 }
 .fade {
   position: absolute;
-  bottom: 0px;
+  top: 0;
 
   display: block;
 
   width: 100%;
-  height: 55%;
+  height: 100%;
 
   background: rgb(0, 0, 0);
   background: linear-gradient(
@@ -294,7 +359,7 @@ word-spacing:-2px; */
   background-color: white;
   /* vertical-align:bottom; */
   /* z-index: 1; */
- /* position: relative */
+  /* position: relative */
 }
 .correct {
   color: #444;
@@ -313,7 +378,7 @@ word-spacing:-2px; */
 .caret {
   background-color: #5433ff;
   height: 2rem;
-  width: .175rem;
+  width: 0.175rem;
   /* border-radius: 0.5em; */
   /* top: 0.4rem; */
   position: absolute;
@@ -324,13 +389,15 @@ word-spacing:-2px; */
   /* top: 0;
     left: 0;
     z-index: 1; */
-    z-index: 999;
+  z-index: 999;
 }
 
 .initial {
   animation: blink-caret 1s infinite ease;
-  top: 0.3rem;
+  top: 0.175rem;
   margin: -1px;
+
+  height: 2.35rem;
 }
 /* .active::after {
     content:"\007C" ;
@@ -341,3 +408,13 @@ word-spacing:-2px; */
     position: absolute;
 
   } */
+
+#out-focus {
+  position: fixed;
+
+  display: none;
+  font-size: 2rem;
+  color: #5433ff;
+  z-index: 500;
+  animation: text-scroll 200ms ease-in-out forwards;
+}
